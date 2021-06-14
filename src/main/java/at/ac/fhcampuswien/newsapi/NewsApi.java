@@ -123,6 +123,10 @@ public class NewsApi {
         } catch (MalformedURLException e) {
             // TODO improve ErrorHandling
             e.printStackTrace();
+            System.out.println("TESTEN SIE JETZT");
+        }
+        catch (Exception e) {
+
         }
         HttpURLConnection con;
         StringBuilder response = new StringBuilder();
@@ -137,6 +141,9 @@ public class NewsApi {
         } catch (IOException e) {
             // TODO improve ErrorHandling
             System.out.println("Error "+e.getMessage());
+            if (e.getMessage().contains("426")) {
+                System.out.println("abcdhsd");
+            }
         }
         return response.toString();
     }
