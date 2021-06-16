@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 
 public class ArticleDownload {
-
+    //DOWNLOAD-PFAD HAS TO BE CHANGED IN CONTROLLER
     public static void downloadUsingStream(String urlStr, String file) throws IOException {
         URL url = new URL(urlStr);
         BufferedInputStream bis = new BufferedInputStream(url.openStream());
