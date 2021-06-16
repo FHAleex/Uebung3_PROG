@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.newsapi;
 
 
+import at.ac.fhcampuswien.NewsApiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import at.ac.fhcampuswien.newsapi.beans.NewsResponse;
@@ -40,6 +41,8 @@ public class NewsApi {
     private String pageSize;
     private String page;
     private String apiKey;
+    //created in order to get the urlbase for downloading the articles
+    private String urlbase;
 
     public Endpoint getEndpoint() {
         return endpoint;
@@ -122,10 +125,9 @@ public class NewsApi {
             obj = new URL(url);
         } catch (MalformedURLException e) {
             // TODO improve ErrorHandling
+         //   System.out.println("The URL has not been built correctly and is malformed.");
             e.printStackTrace();
-            System.out.println("TESTEN SIE JETZT");
-        }
-        catch (Exception e) {
+            throw new NewsApiException("The URL has not been built correctly and is malformed." + "\n" + e.getMessage(), e);
 
         }
         HttpURLConnection con;
@@ -140,9 +142,22 @@ public class NewsApi {
             in.close();
         } catch (IOException e) {
             // TODO improve ErrorHandling
-            System.out.println("Error "+e.getMessage());
-            if (e.getMessage().contains("426")) {
-                System.out.println("abcdhsd");
+
+            //The Exceptions that are thrown are catched in the class "Controller" and are printed
+            if(e.getMessage().contains("426")){
+            //    System.out.println("ERROR: The date you've entered is too far in the past.");
+                throw new NewsApiException("ERROR: The date you've entered is too far in the past." + "\n" + e.getMessage() , e);
+
+            }
+            else if(e.getMessage().contains("400")){
+               // System.out.println("ERROR: The country param is not currently supported on the /everything endpoint.");
+                throw new NewsApiException("ERROR: The country param is not currently supported on the /everything endpoint." + "\n" + e.getMessage() , e);
+
+            }
+            else if(e.getMessage().contains("429")){
+               // System.out.println("ERROR: Too many requests taken, please wait 24h :)");
+                throw new NewsApiException("ERROR: Too many requests taken, please wait 24h :)" + "\n" + e.getMessage() , e);
+
             }
         }
         return response.toString();
@@ -150,10 +165,12 @@ public class NewsApi {
 
     protected String buildURL() {
         // TODO ErrorHandling
+        try{
         String urlbase = String.format(NEWS_API_URL,getEndpoint().getValue(),getQ(),getApiKey());
         StringBuilder sb = new StringBuilder(urlbase);
 
         System.out.println(urlbase);
+        this.urlbase = urlbase;
 
         if(getFrom() != null){
             sb.append(DELIMITER).append("from=").append(getFrom());
@@ -189,25 +206,41 @@ public class NewsApi {
             sb.append(DELIMITER).append("sortBy=").append(getSortBy());
         }
         return sb.toString();
+        }
+        catch(Exception e){
+            //System.out.println("The URL could not be built correctly.");
+            //throw e;
+            throw new NewsApiException("The URL could not be built correctly." + "\n" + e.getMessage(), e);
+        }
     }
 
     public NewsResponse getNews() {
         NewsResponse newsReponse = null;
-        String jsonResponse = requestData();
-        if(jsonResponse != null && !jsonResponse.isEmpty()){
+        try {
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                newsReponse = objectMapper.readValue(jsonResponse, NewsResponse.class);
-                if(!"ok".equals(newsReponse.getStatus())){
-                    System.out.println("Error: "+newsReponse.getStatus());
+            String jsonResponse = requestData();
+            if (jsonResponse != null && !jsonResponse.isEmpty()) {
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                try {
+                    newsReponse = objectMapper.readValue(jsonResponse, NewsResponse.class);
+                    if (!"ok".equals(newsReponse.getStatus())) {
+                        System.out.println("Error: " + newsReponse.getStatus());
+                    }
+                } catch (JsonProcessingException e) {
+                    System.out.println("Error: " + e.getMessage());
                 }
-            } catch (JsonProcessingException e) {
-                System.out.println("Error: "+e.getMessage());
             }
         }
         //TODO improve Errorhandling
+        catch(Exception e) {
+            throw new NewsApiException("There was a problem with getting the News" + "\n" + e.getMessage(), e);
+        }
         return newsReponse;
+    }
+
+    public String getUrlBase(){
+        return urlbase;
     }
 }
 

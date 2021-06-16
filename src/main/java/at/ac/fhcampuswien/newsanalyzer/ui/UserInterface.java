@@ -20,17 +20,17 @@ public class UserInterface
 	public void getDataFromCtrl1(){
 		System.out.println("ABC");
 
-		ctrl.process("ABC", "2021-06-01");
+		ctrl.process("ABC", "2021-06-01", "at");
 	}
 
 	public void getDataFromCtrl2(){
 		// TODO implement me
-		ctrl.process("ball", "2021-06-01");
+		ctrl.process("ball", "2021-06-01", "at");
 	}
 
 	public void getDataFromCtrl3(){
 		// TODO implement me
-		ctrl.process("corona", "2021-06-01");
+		ctrl.process("corona", "2021-06-01", "at");
 	}
 
 	public void getDataForCustomInput() {
@@ -40,8 +40,10 @@ public class UserInterface
 		String choice = scanner.next();
 		System.out.print("Enter From-Date(\"2021-06-01\"): ");
 		String fromDate = scanner.next();
-		System.out.print("Enter Country code (at): ");
-		ctrl.process(choice, fromDate);
+	//	System.out.print("Enter Country code (at): ");
+		System.out.print("Enter country-code: ");
+		String country = scanner.next();
+		ctrl.process(choice, fromDate, country);
 	}
 
 
